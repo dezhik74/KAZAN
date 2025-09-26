@@ -160,7 +160,7 @@ MARKDOWNX_UPLOAD_CONTENT_TYPES = [
 ]
 
 # Путь для загрузки изображений (по умолчанию: 'markdownx/')
-MARKDOWNX_MEDIA_PATH = '/markdown-images/'
+MARKDOWNX_MEDIA_PATH = 'markdown-images/'
 
 # путь к функции
 # MARKDOWNX_MARKDOWNIFY_FUNCTION = 'blog.utils.markdownify'
