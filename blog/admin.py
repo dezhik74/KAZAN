@@ -133,6 +133,12 @@ class BlogPostAdmin(admin.ModelAdmin):
             return False
         return super().has_delete_permission(request, obj)
 
+    # Автоматическая установка автора текущим пользователем
+    def save_model(self, request, obj, form, change):
+        if not obj.author:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
+
 
 # =============== РЕГИСТРАЦИЯ ===============
 admin.site.register(Location, LocationAdmin)

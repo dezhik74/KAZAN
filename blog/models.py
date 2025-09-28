@@ -147,7 +147,7 @@ class PostImage(models.Model):
     )
     image = models.ImageField(
         "Изображение",
-        upload_to="blog/gallery/%Y/%m/"
+        upload_to="blog/gallery/"
     )
     caption = models.CharField("Подпись", max_length=200, blank=True)
     order = models.PositiveSmallIntegerField("Порядок", default=0)

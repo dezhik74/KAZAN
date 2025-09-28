@@ -163,4 +163,4 @@ MARKDOWNX_UPLOAD_CONTENT_TYPES = [
 MARKDOWNX_MEDIA_PATH = 'markdown-images/'
 
 # путь к функции
-# MARKDOWNX_MARKDOWNIFY_FUNCTION = 'blog.utils.markdownify'
+MARKDOWNX_MARKDOWNIFY_FUNCTION = 'blog.utils.markdownify_with_video'
