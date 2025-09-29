@@ -32,6 +32,22 @@ class Location(MP_Node):
             node.name for node in list(self.get_ancestors()) + [self]
         )
 
+    def get_path_slug(self):
+        """Возвращает путь из slug'ов: 'kazan/kazanskiy-kreml'"""
+        ancestors = list(self.get_ancestors()) + [self]
+        return "/".join(node.slug for node in ancestors)
+
+    def get_absolute_url(self):
+        return f"/{self.get_path_slug()}/"
+
+    def get_breadcrumbs(self):
+        """Возвращает список кортежей (локация, URL) для хлебных крошек"""
+        ancestors = list(self.get_ancestors()) + [self]
+        return [
+            (node, f"/{'/'.join(a.slug for a in list(node.get_ancestors()) + [node])}/")
+            for node in ancestors
+        ]
+
 # =============== ТЕГИ ===============
 class Tag(models.Model):
     name = models.CharField("Название", max_length=50, unique=True)
@@ -84,7 +100,7 @@ class BlogPost(models.Model):
 
     cover_image = models.ImageField(
         "Обложка",
-        upload_to="blog/covers/%Y/%m/",
+        upload_to="blog/covers/",
         blank=True,
         null=True
     )
@@ -120,7 +136,8 @@ class BlogPost(models.Model):
         return self.is_published and self.published_at is not None and self.published_at <= now
 
     def get_absolute_url(self):
-        return reverse("blog:post_detail", kwargs={"slug": self.slug})
+        location_path = self.location.get_path_slug()
+        return f"/{location_path}/{self.slug}/"
 
     def get_seo_title(self):
         return self.meta_title or self.title
@@ -136,6 +153,18 @@ class BlogPost(models.Model):
         """Количество оценок"""
         return self.ratings.count()
 
+    def get_breadcrumbs(self):
+        """Хлебные крошки для поста: Главная > Локация1 > Локация2 > Название поста"""
+        crumbs = [
+            ("Главная", "/"),
+        ]
+        # Добавляем все локации
+        location_crumbs = self.location.get_breadcrumbs()
+        for loc, url in location_crumbs:
+            crumbs.append((loc.name, url))
+        # Добавляем сам пост (без ссылки)
+        crumbs.append((self.title, None))
+        return crumbs
 
 # =============== ГАЛЕРЕЯ ===============
 class PostImage(models.Model):
