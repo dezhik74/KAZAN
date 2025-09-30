@@ -1,9 +1,11 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.utils import timezone
+from django.urls import reverse
 from markdownx.views import markdownify_func
 
-from .models import BlogPost, Location
+from .models import BlogPost, Location, Tag
 
 
 class PostListView(ListView):
@@ -50,19 +52,39 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_object(self, queryset=None):
-        location_path = self.kwargs['location_path']
+        # location_path = self.kwargs['location_path']
+        # slug = self.kwargs['slug']
+        #
+        # # Восстанавливаем локацию по пути
+        # slug_parts = location_path.split('/')
+        # try:
+        #     location = Location.objects.get(slug=slug_parts[-1])
+        #     # Проверяем, что полный путь совпадает
+        #     if location.get_path_slug() != location_path:
+        #         raise Location.DoesNotExist
+        # except Location.DoesNotExist:
+        #     raise BlogPost.DoesNotExist
+        #
+        # return get_object_or_404(
+        #     BlogPost,
+        #     slug=slug,
+        #     location=location,
+        #     is_published=True,
+        #     published_at__lte=timezone.now()
+        # )
+        location_path = self.kwargs['location_path'].rstrip('/')
         slug = self.kwargs['slug']
 
-        # Восстанавливаем локацию по пути
+        # Находим локацию
         slug_parts = location_path.split('/')
         try:
             location = Location.objects.get(slug=slug_parts[-1])
-            # Проверяем, что полный путь совпадает
             if location.get_path_slug() != location_path:
                 raise Location.DoesNotExist
         except Location.DoesNotExist:
-            raise BlogPost.DoesNotExist
+            raise Http404("Локация не найдена")
 
+        # Находим пост
         return get_object_or_404(
             BlogPost,
             slug=slug,
@@ -70,6 +92,7 @@ class PostDetailView(DetailView):
             is_published=True,
             published_at__lte=timezone.now()
         )
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,15 +107,25 @@ class LocationDetailView(DetailView):
     context_object_name = 'location'
 
     def get_object(self, queryset=None):
-        location_path = self.kwargs['location_path']
+        # location_path = self.kwargs['location_path']
+        # slug_parts = location_path.split('/')
+        # try:
+        #     location = Location.objects.get(slug=slug_parts[-1])
+        #     if location.get_path_slug() != location_path:
+        #         raise Location.DoesNotExist
+        # except Location.DoesNotExist:
+        #     raise Location.DoesNotExist("Location not found")
+        # return location
+        location_path = self.kwargs['location_path'].rstrip('/')
         slug_parts = location_path.split('/')
         try:
             location = Location.objects.get(slug=slug_parts[-1])
-            if location.get_path_slug() != location_path:
-                raise Location.DoesNotExist
+            if location.get_path_slug() == location_path:
+                return location
         except Location.DoesNotExist:
-            raise Location.DoesNotExist("Location not found")
-        return location
+            pass
+        raise Http404("Локация не найдена")
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,4 +141,44 @@ class LocationDetailView(DetailView):
         for loc, url in location_crumbs:
             crumbs.append((loc.name, url))
         context['breadcrumbs'] = crumbs
+        return context
+
+
+class RootLocationListView(ListView):
+    model = Location
+    template_name = 'blog/location_root.html'
+    context_object_name = 'locations'
+
+    def get_queryset(self):
+        return Location.get_root_nodes()
+
+
+class TagListView(ListView):
+    model = Tag
+    template_name = 'blog/tag_list.html'
+    context_object_name = 'tags'
+    queryset = Tag.objects.all()
+
+class TagDetailView(ListView):
+    template_name = 'blog/tag_detail.html'
+    context_object_name = 'posts'
+    paginate_by = 10  # как на главной
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs['slug'])
+        return BlogPost.objects.filter(
+            tags=self.tag,
+            is_published=True,
+            published_at__lte=timezone.now()
+        ).select_related('author', 'location').order_by('-published_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = self.tag
+        # Хлебные крошки
+        context['breadcrumbs'] = [
+            ("Главная", "/"),
+            ("Теги", reverse("blog:tag_list")),
+            (self.tag.name, None)
+        ]
         return context

@@ -1,0 +1,32 @@
+<!-- blog/templates/blog/tag_list.html -->
+{% extends "base.html" %}
+{% block title %}Теги — TravelBlog{% endblock %}
+{% block meta_description %}
+  <meta name="description" content="Исследуйте статьи по темам: горы, музеи, кухня, природа и многое другое." />
+{% endblock %}
+{% block breadcrumbs %}
+  <nav class="text-sm mb-6 text-text-body/70">
+    <a href="/" class="hover:text-primary transition">Главная</a> /
+    <span class="font-medium text-secondary">Теги</span>
+  </nav>
+{% endblock %}
+{% block content %}
+  <h1 class="text-3xl font-bold mb-2 text-secondary">Теги</h1>
+  <p class="text-text-body/80 mb-8">
+    Найдите статьи по интересующей вас теме.
+  </p>
+
+  {% if tags %}
+    <div class="flex flex-wrap gap-2">
+      {% for tag in tags %}
+        <a href="{{ tag.get_absolute_url }}"
+           class="px-4 py-2 bg-accent-light text-secondary rounded-full hover:bg-white border border-tertiary transition">
+          {{ tag.name }}
+          <span class="text-text-body/60 text-sm ml-1">({{ tag.posts.count }})</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Пока нет тегов.</p>
+  {% endif %}
+{% endblock %}

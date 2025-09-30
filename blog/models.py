@@ -6,6 +6,8 @@ from django.utils import timezone
 from markdownx.models import MarkdownxField
 from treebeard.mp_tree import MP_Node
 
+from blog.upload_paths import cover_upload_to, gallery_upload_to
+
 
 # =============== ЛОКАЦИИ ===============
 class Location(MP_Node):
@@ -38,13 +40,13 @@ class Location(MP_Node):
         return "/".join(node.slug for node in ancestors)
 
     def get_absolute_url(self):
-        return f"/{self.get_path_slug()}/"
+        return f"/location/{self.get_path_slug()}/"
 
     def get_breadcrumbs(self):
         """Возвращает список кортежей (локация, URL) для хлебных крошек"""
         ancestors = list(self.get_ancestors()) + [self]
         return [
-            (node, f"/{'/'.join(a.slug for a in list(node.get_ancestors()) + [node])}/")
+            (node, f"/location/{'/'.join(a.slug for a in list(node.get_ancestors()) + [node])}/")
             for node in ancestors
         ]
 
@@ -65,6 +67,9 @@ class Tag(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("blog:tag_detail", kwargs={"slug": self.slug})
 
 
 # =============== ЗАПИСЬ БЛОГА ===============
@@ -95,12 +100,12 @@ class BlogPost(models.Model):
 
     content_markdown = MarkdownxField(
         "Контент",
-        help_text="Поддерживается вставка изображений и ссылок на Rutube"
+        help_text="Поддерживается вставка изображений и ссылок на Rutube в формате {{ rutube:abcde123456 }}"
     )
 
     cover_image = models.ImageField(
         "Обложка",
-        upload_to="blog/covers/",
+        upload_to=cover_upload_to,
         blank=True,
         null=True
     )
@@ -137,7 +142,7 @@ class BlogPost(models.Model):
 
     def get_absolute_url(self):
         location_path = self.location.get_path_slug()
-        return f"/{location_path}/{self.slug}/"
+        return f"/post/{location_path}/{self.slug}/"
 
     def get_seo_title(self):
         return self.meta_title or self.title
@@ -176,7 +181,7 @@ class PostImage(models.Model):
     )
     image = models.ImageField(
         "Изображение",
-        upload_to="blog/gallery/"
+        upload_to=gallery_upload_to,
     )
     caption = models.CharField("Подпись", max_length=200, blank=True)
     order = models.PositiveSmallIntegerField("Порядок", default=0)

@@ -4,79 +4,88 @@
 {% block title %}Путешествия и локации{% endblock %}
 
 {% block content %}
-  <!-- Hero / Intro -->
-  <section class="mb-12 text-center">
-    <h1 class="text-4xl font-bold mb-4 text-secondary">Откройте мир вместе с нами</h1>
-    <p class="text-lg text-text-body max-w-2xl mx-auto">
-      Вдохновляющие рассказы, фотографии и советы от путешественников по всему миру.
-    </p>
-  </section>
+    <!-- Hero / Intro -->
+    <section class="mb-12 text-center">
+        <h1 class="text-4xl font-bold mb-4 text-secondary">Откройте мир вместе с нами</h1>
+        <p class="text-lg text-text-body max-w-2xl mx-auto">
+            Вдохновляющие рассказы, фотографии и советы от путешественников по всему миру.
+        </p>
+    </section>
 
-  <!-- Latest Blog Posts -->
-  <section>
-    <h2 class="text-2xl font-semibold mb-6 text-secondary">Последние записи</h2>
-    <div class="space-y-8">
-      {% for post in posts %}
-        <article class="bg-white rounded-xl shadow overflow-hidden border border-tertiary">
-          <div class="md:flex">
-            <div class="md:w-1/3">
-              {% if post.cover_image %}
-                <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-48 md:h-full object-cover" />
-              {% else %}
-                <div class="w-full h-48 md:h-full bg-gray-200 flex items-center justify-center text-gray-500">Нет обложки</div>
-              {% endif %}
-            </div>
-            <div class="p-6 md:w-2/3">
-              <div class="flex items-center text-sm text-text-body/70 mb-2">
-                <span>{{ post.location.name }}</span>
-                <span class="mx-2">•</span>
-                <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d E Y" }}</time>
-              </div>
-              <h3 class="text-xl font-bold mb-2">
-                <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition">{{ post.title }}</a>
-              </h3>
-              <p class="text-text-body/80 mb-4">
-                {{ post.meta_description|default:post.content_markdown|truncatewords:30 }}
-              </p>
-              <div class="flex flex-wrap gap-2 mb-4">
-                {% for tag in post.tags.all %}
-                  <span class="px-2 py-1 bg-tertiary/20 text-primary text-xs rounded">{{ tag.name }}</span>
-                {% endfor %}
-              </div>
-              <div class="flex items-center text-sm text-text-body/70">
-                <span>Автор: {{ post.author.get_full_name|default:post.author.username }}</span>
-                <span class="mx-2">•</span>
-                <span>Просмотров: {{ post.views_count }}</span>
-{#                <span>Просмотров: {{ post.views_count|intcomma }}</span>#}
-                <span class="mx-2">•</span>
-                <span>Рейтинг: 
+    <!-- Latest Blog Posts -->
+    <section>
+        <h2 class="text-2xl font-semibold mb-6 text-secondary">Последние записи</h2>
+        <div class="space-y-8">
+            {% for post in posts %}
+                <article class="bg-white rounded-xl shadow overflow-hidden border border-tertiary">
+                    <div class="md:flex">
+                        <div class="md:w-1/3">
+                            {% if post.cover_image %}
+                                <img src="{{ post.cover_image.url }}" alt="{{ post.title }}"
+                                     class="w-full h-48 md:h-full object-cover"/>
+                            {% else %}
+                                <div class="w-full h-48 md:h-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                    Нет обложки
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="p-6 md:w-2/3">
+                            <div class="flex items-center text-sm text-text-body/70 mb-2">
+                                <a href="{{ post.location.get_absolute_url }}"
+                                   class="hover:text-primary transition">{{ post.location.name }}</a>
+                                <span class="mx-2">•</span>
+                                <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d E Y" }}</time>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">
+                                <a href="{{ post.get_absolute_url }}"
+                                   class="hover:text-primary transition">{{ post.title }}</a>
+                            </h3>
+                            <p class="text-text-body/80 mb-4">
+                                {{ post.meta_description|default:post.content_markdown|truncatewords:30 }}
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                {% for tag in post.tags.all %}
+                                    <a href="{{ tag.get_absolute_url }}"
+                                       class="px-2 py-1 bg-tertiary/20 text-primary text-xs rounded hover:bg-tertiary/40 transition">
+                                        {{ tag.name }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            <div class="flex items-center text-sm text-text-body/70">
+                                <span>Автор: {{ post.author.get_full_name|default:post.author.username }}</span>
+                                <span class="mx-2">•</span>
+                                <span>Просмотров: {{ post.views_count }}</span>
+                                {#                <span>Просмотров: {{ post.views_count|intcomma }}</span>#}
+                                <span class="mx-2">•</span>
+                                <span>Рейтинг:
                   <span class="text-primary">★{{ post.average_rating|default:"—" }}</span> 
                   ({{ post.rating_count }})
                 </span>
-              </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <p>Пока нет опубликованных записей.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация (опционально) -->
+        {% if is_paginated %}
+            <div class="mt-8 flex justify-center space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="px-3 py-1 border border-tertiary rounded">Первая</a>
+                    <a href="?page={{ page_obj.previous_page_number }}"
+                       class="px-3 py-1 border border-tertiary rounded">Назад</a>
+                {% endif %}
+
+                <span class="px-3 py-1">Стр. {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-tertiary rounded">Вперёд</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 border border-tertiary rounded">Последняя</a>
+                {% endif %}
             </div>
-          </div>
-        </article>
-      {% empty %}
-        <p>Пока нет опубликованных записей.</p>
-      {% endfor %}
-    </div>
-
-    <!-- Пагинация (опционально) -->
-    {% if is_paginated %}
-      <div class="mt-8 flex justify-center space-x-2">
-        {% if page_obj.has_previous %}
-          <a href="?page=1" class="px-3 py-1 border border-tertiary rounded">Первая</a>
-          <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border border-tertiary rounded">Назад</a>
         {% endif %}
-
-        <span class="px-3 py-1">Стр. {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
-
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-tertiary rounded">Вперёд</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 border border-tertiary rounded">Последняя</a>
-        {% endif %}
-      </div>
-    {% endif %}
-  </section>
+    </section>
 {% endblock %}

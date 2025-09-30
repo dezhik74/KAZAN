@@ -1,0 +1,37 @@
+<!-- blog/templates/blog/location_root.html -->
+{% extends "base.html" %}
+
+{% block title %}Локации — TravelBlog{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Исследуйте локации: от регионов до улиц и достопримечательностей." />
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav class="text-sm mb-6 text-text-body/70">
+    <a href="/" class="hover:text-primary transition">Главная</a> /
+    <span class="font-medium text-secondary">Локации</span>
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <h1 class="text-3xl font-bold mb-2 text-secondary">Локации</h1>
+  <p class="text-text-body/80 mb-8">
+    Путешествуйте по карте России и мира: выберите регион, город или достопримечательность.
+  </p>
+
+  {% if locations %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for loc in locations %}
+        <a href="{{ loc.get_absolute_url }}" class="block p-4 bg-accent-light rounded-lg border border-tertiary hover:bg-white transition">
+          <h3 class="font-bold text-secondary text-lg">{{ loc.name }}</h3>
+          {% if loc.description %}
+            <p class="text-sm text-text-body/70 mt-1">{{ loc.description|truncatewords:12 }}</p>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-text-body">Пока нет локаций.</p>
+  {% endif %}
+{% endblock %}

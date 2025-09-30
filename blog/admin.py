@@ -95,6 +95,18 @@ class BlogPostAdmin(admin.ModelAdmin):
     inlines = [PostImageInline, PostRatingInline]
     readonly_fields = ("views_count", "created_at", "updated_at", "average_rating_display")
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Принудительно задаём ширину 100% для SEO-полей
+        seo_fields = ['meta_title', 'meta_description']
+        for field_name in seo_fields:
+            if field_name in form.base_fields:
+                form.base_fields[field_name].widget.attrs.update({
+                    'style': 'width: 100%',
+                    'class': 'vTextField'
+                })
+        return form
+
     fieldsets = (
         ("Основное", {
             "fields": ("title", "slug", "author", "location", "tags")

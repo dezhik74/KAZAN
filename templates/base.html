@@ -1,74 +1,51 @@
-<!-- blog/templates/base.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  {% block meta_description %}
-    <meta name="description" content="Путешествия, локации и вдохновение — последние записи из нашего блога." />
-  {% endblock %}
-  <title>{% block title %}TravelBlog{% endblock %}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#2A9D8F',
-            secondary: '#264653',
-            tertiary: '#8AB1B0',
-            background: '#F8F7F2',
-            'text-body': '#2D3135',
-            'accent-light': '#E9E5D6'
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #F8F7F2;
-      color: #2D3135;
-    }
-    .prose a {
-      color: #2A9D8F;
-      text-decoration: underline;
-    }
-    {% block extra_css %}{% endblock %}
-  </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    {% block meta_description %}
+        <meta name="description" content="Путешествия, локации и вдохновение — последние записи из нашего блога."/>
+    {% endblock %}
+    <link rel="stylesheet" href="{% load static %}{% static 'css/output.css' %}">
+    <title>{% block title %}TravelBlog{% endblock %}</title>
+    <style>
+        {% block extra_css %}{% endblock %}
+    </style>
 </head>
 <body class="bg-background text-text-body">
-  <header class="bg-secondary text-white">
+<header class="bg-secondary text-white">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="/" class="text-2xl font-bold text-primary">TravelBlog</a>
-      <nav class="hidden md:block">
-        <ul class="flex space-x-6">
-          <li><a href="#" class="hover:text-primary transition">Локации</a></li>
-          <li><a href="#" class="hover:text-primary transition">Теги</a></li>
-          <li><a href="#" class="hover:text-primary transition">О нас</a></li>
-        </ul>
-      </nav>
-      <button class="md:hidden text-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-        </svg>
-      </button>
+        <a href="/" class="text-2xl font-bold text-primary">TravelBlog</a>
+        <nav class="hidden md:block">
+            <ul class="flex space-x-6">
+                <li><a href="{% url 'blog:location_root' %}" class="hover:text-primary transition">Локации</a></li>
+                <li><a href="{% url 'blog:tag_list' %}" class="hover:text-primary transition">Теги</a></li>
+                <li><a href="#" class="hover:text-primary transition">О нас</a></li>
+            </ul>
+        </nav>
+        <button class="md:hidden text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+            </svg>
+        </button>
     </div>
-  </header>
+</header>
 
-  <main class="container mx-auto px-4 py-8">
+<main class="container mx-auto px-4 py-8">
     {% block breadcrumbs %}
-      <!-- Может быть переопределён -->
+        <!-- Может быть переопределён -->
     {% endblock %}
 
     {% block content %}
     {% endblock %}
-  </main>
+</main>
 
-  <footer class="bg-secondary text-white py-8 mt-12">
+<footer class="bg-secondary text-white py-8 mt-12">
     <div class="container mx-auto px-4 text-center">
-      <p>© 2024 TravelBlog. Все права защищены.</p>
+        <p>© 2024 TravelBlog. Все права защищены.</p>
     </div>
-  </footer>
+</footer>
 </body>
 </html>

@@ -12,3 +12,9 @@ wheels/
 .env
 
 *.sqlite3
+
+.idea
+
+node_modules
+
+static/css/output.css
