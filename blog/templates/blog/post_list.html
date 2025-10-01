@@ -1,5 +1,6 @@
 <!-- blog/templates/blog/post_list.html -->
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}Путешествия и локации{% endblock %}
 
@@ -54,8 +55,7 @@
                             <div class="flex items-center text-sm text-text-body/70">
                                 <span>Автор: {{ post.author.get_full_name|default:post.author.username }}</span>
                                 <span class="mx-2">•</span>
-                                <span>Просмотров: {{ post.views_count }}</span>
-                                {#                <span>Просмотров: {{ post.views_count|intcomma }}</span>#}
+                                <span>Просмотров: {{ post.views_count|intcomma }}</span>
                                 <span class="mx-2">•</span>
                                 <span>Рейтинг:
                   <span class="text-primary">★{{ post.average_rating|default:"—" }}</span> 

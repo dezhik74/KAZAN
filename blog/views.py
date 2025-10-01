@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.db import models
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
@@ -5,7 +8,7 @@ from django.utils import timezone
 from django.urls import reverse
 from markdownx.views import markdownify_func
 
-from .models import BlogPost, Location, Tag
+from .models import BlogPost, Location, Tag, PostView
 
 
 class PostListView(ListView):
@@ -52,26 +55,6 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_object(self, queryset=None):
-        # location_path = self.kwargs['location_path']
-        # slug = self.kwargs['slug']
-        #
-        # # Восстанавливаем локацию по пути
-        # slug_parts = location_path.split('/')
-        # try:
-        #     location = Location.objects.get(slug=slug_parts[-1])
-        #     # Проверяем, что полный путь совпадает
-        #     if location.get_path_slug() != location_path:
-        #         raise Location.DoesNotExist
-        # except Location.DoesNotExist:
-        #     raise BlogPost.DoesNotExist
-        #
-        # return get_object_or_404(
-        #     BlogPost,
-        #     slug=slug,
-        #     location=location,
-        #     is_published=True,
-        #     published_at__lte=timezone.now()
-        # )
         location_path = self.kwargs['location_path'].rstrip('/')
         slug = self.kwargs['slug']
 
@@ -85,13 +68,27 @@ class PostDetailView(DetailView):
             raise Http404("Локация не найдена")
 
         # Находим пост
-        return get_object_or_404(
+        post = get_object_or_404(
             BlogPost,
             slug=slug,
             location=location,
             is_published=True,
             published_at__lte=timezone.now()
         )
+        ip = self.request.META.get('HTTP_X_FORWARDED_FOR', self.request.META.get('REMOTE_ADDR'))
+        if ip:
+            # Проверяем, не был ли уже просмотрен за последние 24 часа
+            day_ago = timezone.now() - timedelta(hours=24)
+            if not PostView.objects.filter(
+                    post=post,
+                    ip_address=ip,
+                    created_at__gte=day_ago
+            ).exists():
+                PostView.objects.create(post=post, ip_address=ip)
+                BlogPost.objects.filter(pk=post.pk).update(views_count=models.F('views_count') + 1)
+                post.views_count += 1
+
+        return post
 
 
     def get_context_data(self, **kwargs):

@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+#TODO вставить везде humanize и intcomma
+#TODO карточку поста можно переиспользовать
 
     'treebeard',
     'storages',

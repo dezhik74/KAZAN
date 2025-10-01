@@ -217,3 +217,13 @@ class PostRating(models.Model):
 
     def __str__(self):
         return f"{self.post.title} — {self.score}★ от {self.ip_address}"
+
+
+# =============== Умный счетчик просмотров ===============
+class PostView(models.Model):
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='views')
+    ip_address = models.GenericIPAddressField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'ip_address')

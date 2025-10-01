@@ -1,6 +1,6 @@
 <!-- blog/templates/blog/post_detail.html -->
 {% extends "base.html" %}
-{#{% load markdownx_tags %}#}
+{% load humanize %}
 
 {% block title %}{{ post.title }} — TravelBlog{% endblock %}
 
@@ -37,8 +37,7 @@
             <span>•</span>
             <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d E Y" }}</time>
             <span>•</span>
-            <span>Просмотров: {{ post.views_count }}</span>
-            {#      <span>Просмотров: {{ post.views_count|intcomma }}</span>#}
+            <span>Просмотров: {{ post.views_count| intcomma }}</span>
             <span>•</span>
             <span>Рейтинг:
         <span class="text-primary font-medium">★{{ post.average_rating|default:"—" }}</span>
