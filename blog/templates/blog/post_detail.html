@@ -9,6 +9,8 @@
 {% endblock %}
 
 {% block extra_css %}
+    <!-- Подключаем Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -39,7 +41,7 @@
             {#      <span>Просмотров: {{ post.views_count|intcomma }}</span>#}
             <span>•</span>
             <span>Рейтинг:
-        <span class="text-primary font-medium">★{{ post.average_rating|default:"—" }}</span> 
+        <span class="text-primary font-medium">★{{ post.average_rating|default:"—" }}</span>
         ({{ post.rating_count }})
       </span>
         </div>
@@ -57,34 +59,49 @@
     {% if post.cover_image %}
         <figure class="mb-8 rounded-lg overflow-hidden border border-tertiary max-w-4xl mx-auto">
             <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-auto"/>
-            <figcaption class="mt-2 text-center text-text-body/70">Обложка записи</figcaption>
+            <figcaption class="mt-2 text-center text-text-body/70">{{ post.meta_title }}</figcaption>
         </figure>
     {% endif %}
 
     <!-- Content -->
     <article class="prose prose-lg mb-10 max-w-4xl mx-auto">
-        {#    {{ post.content_markdown|markdownify }}#}
         {{ content_markdown_safe }}
     </article>
 
     <!-- Gallery -->
     {% if post.gallery.exists %}
-        <section class="mb-10 max-w-4xl mx-auto">
-            <h2 class="text-2xl font-semibold mb-4 text-secondary">Галерея</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for img in post.gallery.all %}
-                    <figure class="rounded overflow-hidden border border-tertiary">
-                        <img src="{{ img.image.url }}" alt="{{ img.caption|default:'Фото' }}"
-                             class="w-full h-48 object-cover"/>
-                        {% if img.caption %}
-                            <figcaption
-                                    class="mt-1 text-sm text-center text-text-body/70">{{ img.caption }}</figcaption>
-                        {% endif %}
-                    </figure>
-                {% endfor %}
+        <!-- HTML-разметка для Swiper -->
+        <div class="relative w-full max-w-full mx-auto my-6 swiper-container">
+            <div class="swiper swiper-gallery">
+                <div class="swiper-wrapper mb-7">
+                    {% for img in post.gallery.all %}
+                        <div class="swiper-slide flex flex-col items-center justify-center rounded-lg border border-tertiary shadow-sm overflow-hidden">
+                            <div class="relative w-full h-64 md:h-72 lg:h-80">
+                                <img
+                                        src="{{ img.image.url }}"
+                                        class="w-full h-full object-cover"
+                                        loading="lazy"
+                                        alt="{{ img.caption }}"
+                                />
+                                <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>
+                            </div>
+                            {% if img.caption %}
+                                <p class="mt-2 text-sm text-center text-gray-600">{{ img.caption }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Стрелки навигации -->
+                <div class="swiper-button-next !text-white !bg-black/50 !w-10 !h-10 !rounded-full after:!text-xs"></div>
+                <div class="swiper-button-prev !text-white !bg-black/50 !w-10 !h-10 !rounded-full after:!text-xs"></div>
+
+                <!-- Пагинация (точки) -->
+                <div class="swiper-pagination !bottom-0 !pb-2"></div>
             </div>
-        </section>
+        </div>
     {% endif %}
+
 
     <!-- Rating -->
     <section class="bg-white p-6 rounded-lg shadow border border-tertiary max-w-2xl mx-auto">
@@ -104,4 +121,40 @@
         </div>
         <p class="text-sm text-text-body/60 mt-2">Оценка учитывается по IP-адресу (один раз на пост).</p>
     </section>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Подключаем Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Инициализация Swiper -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const swiper = new Swiper('.swiper-gallery', {
+                loop: true,
+                slidesPerView: 1,
+                spaceBetween: 16,
+                lazy: true,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                breakpoints: {
+                    640: {slidesPerView: 2},
+                    768: {slidesPerView: 3},
+                    1024: {slidesPerView: 3},
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                speed: 800,
+            });
+        });
+    </script>
+
 {% endblock %}
