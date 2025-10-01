@@ -24,57 +24,13 @@
   {% if posts %}
     <div class="space-y-6">
       {% for post in posts %}
-        <article class="bg-white p-6 rounded-lg shadow border border-tertiary">
-          <div class="flex items-center text-sm text-text-body/70 mb-2">
-            <span>{{ post.location.name }}</span>
-            <span class="mx-2">•</span>
-            <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d E Y" }}</time>
-          </div>
-          <h3 class="text-xl font-bold mb-2">
-            <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition">{{ post.title }}</a>
-          </h3>
-          <p class="text-text-body/80 mb-4">
-            {{ post.meta_description|default:post.content_markdown|truncatewords:30 }}
-          </p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            {% for tag_item in post.tags.all %}
-              <a href="{{ tag_item.get_absolute_url }}"
-                 class="px-2 py-1 bg-tertiary/20 text-primary text-xs rounded hover:bg-tertiary/40 transition">
-                {{ tag_item.name }}
-              </a>
-            {% endfor %}
-          </div>
-          <div class="flex items-center text-sm text-text-body/70">
-            <span>Автор: {{ post.author.get_full_name|default:post.author.username }}</span>
-            <span class="mx-2">•</span>
-            <span>Просмотров: {{ post.views_count }}</span>
-            <span class="mx-2">•</span>
-            <span>Рейтинг:
-              <span class="text-primary">★{{ post.average_rating|default:"—" }}</span>
-              ({{ post.rating_count }})
-            </span>
-          </div>
-        </article>
+        {% include "blog/partials/post_card.html" with post=post %}
       {% endfor %}
     </div>
 
     <!-- Пагинация -->
     {% if is_paginated %}
-      <div class="mt-8 flex flex-wrap justify-center items-center gap-2">
-        {% if page_obj.has_previous %}
-          <a href="?page=1" class="px-3 py-1 border border-tertiary rounded hover:bg-accent-light">Первая</a>
-          <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border border-tertiary rounded hover:bg-accent-light">Назад</a>
-        {% endif %}
-
-        <span class="px-3 py-1">
-          Стр. {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-        </span>
-
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-tertiary rounded hover:bg-accent-light">Вперёд</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 border border-tertiary rounded hover:bg-accent-light">Последняя</a>
-        {% endif %}
-      </div>
+      {% include "blog/partials/post_card.html" with post=post %}
     {% endif %}
 
   {% else %}
