@@ -7,7 +7,7 @@
     {% block meta_description %}
         <meta name="description" content="Путешествия, локации и вдохновение — последние записи из нашего блога."/>
     {% endblock %}
-    <link rel="stylesheet" href="{% load static %}{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
     <title>{% block title %}TravelBlog{% endblock %}</title>
     <!-- CSRF для HTMX -->
@@ -15,9 +15,10 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-background text-text-body">
-<header class="bg-secondary text-white">
+<header class="bg-secondary text-white relative z-50">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-primary">TravelBlog</a>
+        <!-- Десктопное меню -->
         <nav class="hidden md:block">
             <ul class="flex space-x-6">
                 <li><a href="{% url 'blog:location_root' %}" class="hover:text-primary transition">Локации</a></li>
@@ -25,30 +26,79 @@
                 <li><a href="#" class="hover:text-primary transition">О нас</a></li>
             </ul>
         </nav>
-        <button class="md:hidden text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
+        <!-- Кнопка гамбургера / крестика -->
+        <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <!-- Гамбургер -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" id="hamburger-icon">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+            </svg>
+            <!-- Крестик -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" id="close-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
     </div>
 </header>
 
+<!-- Мобильное меню (без оверлея) -->
+<div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 bg-secondary text-white z-100 hidden flex flex-col pt-16 pb-12">
+    <nav class="flex items-end flex-col px-4">
+        <a href="{% url 'blog:location_root' %}" class="block text-lg hover:text-primary mb-6">Локации</a>
+        <a href="{% url 'blog:tag_list' %}" class="text-lg hover:text-primary mb-6">Теги</a>
+        <a href="#" class="text-lg hover:text-primary transition mb-6">О нас</a>
+    </nav>
+</div>
+
 <main class="container mx-auto px-4 py-8">
     {% block breadcrumbs %}
         <!-- Может быть переопределён -->
     {% endblock %}
-
     {% block content %}
     {% endblock %}
 </main>
 
 <footer class="bg-secondary text-white py-8 mt-12">
     <div class="container mx-auto px-4 text-center">
-        <p>© 2024 TravelBlog. Все права защищены.</p>
+        <p>© 2025 TravelBlog. Все права защищены.</p>
     </div>
 </footer>
-{% block extra_js %}
-{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+        const menuLinks = mobileMenu.querySelectorAll('a');
+
+        const openMenu = () => {
+            mobileMenu.classList.remove('hidden');
+            hamburgerIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        };
+
+        const closeMenu = () => {
+            mobileMenu.classList.add('hidden');
+            closeIcon.classList.add('hidden');
+            hamburgerIcon.classList.remove('hidden');
+        };
+
+        mobileMenuButton.addEventListener('click', () => {
+            if (mobileMenu.classList.contains('hidden')) {
+                openMenu();
+            } else {
+                closeMenu();
+            }
+        });
+
+        menuLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
