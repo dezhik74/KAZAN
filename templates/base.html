@@ -15,8 +15,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-background text-text-body">
-<header class="bg-secondary text-white relative z-50">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+<header class="bg-secondary text-white z-50" >
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center h-20">
         <a href="/" class="text-2xl font-bold text-primary">TravelBlog</a>
         <!-- Десктопное меню -->
         <nav class="hidden md:block">
@@ -42,12 +42,15 @@
     </div>
 </header>
 
-<!-- Мобильное меню (без оверлея) -->
-<div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 bg-secondary text-white z-100 hidden flex flex-col pt-16 pb-12">
-    <nav class="flex items-end flex-col px-4">
-        <a href="{% url 'blog:location_root' %}" class="block text-lg hover:text-primary mb-6">Локации</a>
-        <a href="{% url 'blog:tag_list' %}" class="text-lg hover:text-primary mb-6">Теги</a>
-        <a href="#" class="text-lg hover:text-primary transition mb-6">О нас</a>
+<!-- Мобильное меню (c оверлеем) -->
+<div id="overlay" class="fixed inset-0 top-20 z-30 h-full w-full hidden">
+    <div class="absolute inset-0 bg-gray-300 opacity-50"></div>
+</div>
+<div id="mobile-menu" class="fixed right-0 z-40 w-40 bg-secondary pb-6 pt-5 text-white hidden">
+    <nav class="flex flex-col px-4">
+        <a href="{% url 'blog:location_root' %}" class="hover:text-primary mb-6 text-lg">Локации</a>
+        <a href="{% url 'blog:tag_list' %}" class="hover:text-primary mb-6 text-lg">Теги</a>
+        <a href="#" class="hover:text-primary mb-6 text-lg transition">О нас</a>
     </nav>
 </div>
 
@@ -72,17 +75,23 @@
         const hamburgerIcon = document.getElementById('hamburger-icon');
         const closeIcon = document.getElementById('close-icon');
         const menuLinks = mobileMenu.querySelectorAll('a');
+        const myBody = document.querySelector('body');
+        const overlay = document.getElementById('overlay');
 
         const openMenu = () => {
             mobileMenu.classList.remove('hidden');
             hamburgerIcon.classList.add('hidden');
             closeIcon.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            myBody.classList.add('overflow-x-hidden')
         };
 
         const closeMenu = () => {
             mobileMenu.classList.add('hidden');
             closeIcon.classList.add('hidden');
+            overlay.classList.add('hidden');
             hamburgerIcon.classList.remove('hidden');
+            myBody.classList.remove('overflow-x-hidden')
         };
 
         mobileMenuButton.addEventListener('click', () => {
