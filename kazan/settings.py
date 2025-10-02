@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 #TODO вставить везде humanize и intcomma
-#TODO карточку поста можно переиспользовать
+#TODO добавить раздел популярные посты в главное меню
 
     'treebeard',
     'storages',

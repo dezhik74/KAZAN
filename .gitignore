@@ -13,7 +13,8 @@ wheels/
 
 *.sqlite3
 
-.idea
+.idea/
+.idea/inspectionProfiles/profiles_settings.xml
 
 node_modules
 
