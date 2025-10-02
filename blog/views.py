@@ -1,14 +1,15 @@
 from datetime import timedelta
 
 from django.db import models
-from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.views import View
 from django.views.generic import ListView, DetailView
 from django.utils import timezone
 from django.urls import reverse
 from markdownx.views import markdownify_func
 
-from .models import BlogPost, Location, Tag, PostView
+from .models import BlogPost, Location, Tag, PostView, PostRating
 
 
 class PostListView(ListView):
@@ -179,3 +180,30 @@ class TagDetailView(ListView):
             (self.tag.name, None)
         ]
         return context
+
+
+class PostRatingView(View):
+    def post(self, request, post_id):
+        post = get_object_or_404(BlogPost, pk=post_id)
+        score = request.POST.get('score')
+        if not score or not score.isdigit():
+            return HttpResponse("Неверная оценка", status=400)
+        score = int(score)
+        if score < 1 or score > 5:
+            return HttpResponse("Оценка должна быть от 1 до 5", status=400)
+
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
+        if ip:
+            # Обновляем или создаём оценку
+            PostRating.objects.update_or_create(
+                post=post,
+                ip_address=ip,
+                defaults={'score': score}
+            )
+            # Обновляем кэшированные значения (если бы они были) — пока не нужно
+        else:
+            return HttpResponse("Не удалось определить IP", status=400)
+
+        # Рендерим только обновлённый блок рейтинга
+        context = {'post': post}
+        return render(request, 'blog/partials/post_rating.html', context)

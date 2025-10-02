@@ -1,0 +1,25 @@
+<div id="post-rating-section" class="bg-white p-6 rounded-lg shadow border border-tertiary max-w-2xl mx-auto">
+    <h3 class="text-xl font-semibold mb-4 text-secondary">Оцените эту статью</h3>
+    <div class="flex items-center space-x-1">
+        {% for i in "12345" %}
+            <button
+                type="button"
+                class="text-tertiary hover:text-primary focus:outline-none text-2xl"
+                aria-label="Оценить на {{ forloop.counter }} звёзд"
+                hx-post="{% url 'blog:post_rate' post.id %}"
+                hx-target="#post-rating-section"
+                hx-swap="outerHTML"
+                hx-vals='{"score": "{{ forloop.counter }}"}'
+            >
+                ★
+            </button>
+        {% endfor %}
+    </div>
+    <div class="mt-3 flex items-center text-sm text-text-body/80">
+        <span>Текущий рейтинг:
+            <span class="text-primary font-medium">★{{ post.average_rating|default:"—" }}</span>
+            ({{ post.rating_count }} голосов)
+        </span>
+    </div>
+    <p class="text-sm text-text-body/60 mt-2">Вы можете изменить свою оценку в любое время.</p>
+</div>

@@ -8,7 +8,10 @@
         <meta name="description" content="Путешествия, локации и вдохновение — последние записи из нашего блога."/>
     {% endblock %}
     <link rel="stylesheet" href="{% load static %}{% static 'css/output.css' %}">
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
     <title>{% block title %}TravelBlog{% endblock %}</title>
+    <!-- CSRF для HTMX -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-background text-text-body">

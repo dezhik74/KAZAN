@@ -101,25 +101,9 @@
         </div>
     {% endif %}
 
-
     <!-- Rating -->
-    <section class="bg-white p-6 rounded-lg shadow border border-tertiary max-w-2xl mx-auto">
-        <h3 class="text-xl font-semibold mb-4 text-secondary">Оцените эту статью</h3>
-        <div class="flex items-center space-x-2">
-            {% for i in "12345" %}
-                {#        {% if forloop.counter <= post.average_rating|default:0|floatformat:0|int %}#}
-                {% if forloop.counter <= post.average_rating|default:0|floatformat:0 %}
-                    <span class="text-primary">★</span>
-                {% else %}
-                    <span class="text-tertiary">★</span>
-                {% endif %}
-            {% endfor %}
-            <span class="ml-2 text-text-body/80">
-        {{ post.average_rating|default:"—" }} из 5 ({{ post.rating_count }} голосов)
-      </span>
-        </div>
-        <p class="text-sm text-text-body/60 mt-2">Оценка учитывается по IP-адресу (один раз на пост).</p>
-    </section>
+    <!-- Rating -->
+    {% include "blog/partials/post_rating.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -153,6 +137,12 @@
                 },
                 speed: 800,
             });
+        });
+    </script>
+    <script>
+        // HTMX автоматически подхватит CSRF-токен из meta-тега
+        document.body.addEventListener('htmx:configRequest', function (event) {
+            event.detail.headers['X-CSRFToken'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         });
     </script>
 

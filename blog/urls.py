@@ -20,4 +20,7 @@ urlpatterns = [
     # Теги
     path('tags/', views.TagListView.as_view(), name='tag_list'),
     path('tag/<slug:slug>/', views.TagDetailView.as_view(), name='tag_detail'),
+
+    # Оценка поста
+    path('post_rate/<int:post_id>/', views.PostRatingView.as_view(), name='post_rate'),
 ]
