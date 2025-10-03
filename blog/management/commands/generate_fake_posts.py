@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from blog.models import BlogPost, Location, Tag
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -36,7 +37,7 @@ class Command(BaseCommand):
         )[:500]  # ровно 500 символов
 
         # 5. Даты
-        now = datetime.now()
+        now = timezone.now()
         yesterday = now - timedelta(days=1)
         minus_one_month = now - timedelta(days=30)
 
@@ -45,6 +46,7 @@ class Command(BaseCommand):
             title = f"Fake Title {i}"
             slug = slugify(title)
             published_at = yesterday + timedelta(minutes=i)
+            fake_meta_description = f"Fake Description {i}"
 
             post, created = BlogPost.objects.get_or_create(
                 title=title,
@@ -54,7 +56,7 @@ class Command(BaseCommand):
                     "location": fake_location,
                     "content_markdown": fake_content,
                     "meta_title": title,
-                    "meta_description": "",
+                    "meta_description": fake_meta_description,
                     "created_at": minus_one_month,
                     "updated_at": minus_one_month,
                     "published_at": published_at,
