@@ -31,3 +31,8 @@ def gallery_upload_to(instance, filename):
     # Сохраняем оригинальное имя файла, но в нужной папке
     # return f'gallery/{location_path}/{post_slug}/{filename}'
     return f'post_images/{location_path}/{post_slug}/gallery.{ext}'
+
+def about_page_cover_upload_to(instance, filename):
+    ext = filename.split('.')[-1]
+    return f'about_images/{instance.pk}/cover.{ext}'
+

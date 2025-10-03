@@ -6,7 +6,7 @@ from django.utils import timezone
 from markdownx.models import MarkdownxField
 from treebeard.mp_tree import MP_Node
 
-from blog.upload_paths import cover_upload_to, gallery_upload_to
+from blog.upload_paths import cover_upload_to, gallery_upload_to, about_page_cover_upload_to
 
 
 # =============== ЛОКАЦИИ ===============
@@ -226,7 +226,7 @@ class PostView(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('post', 'ip_address')
+        unique_together = ('post', 'ip_address', 'created_at')
 
 
 # blog/models.py
@@ -238,10 +238,6 @@ from markdownx.models import MarkdownxField
 from .utils import markdownify_with_video  # для рендера контента
 
 # =============== СТРАНИЦА "О НАС" ===============
-def about_page_cover_upload_to(instance, filename):
-    ext = filename.split('.')[-1]
-    return f'about_images/{instance.pk}/cover.{ext}'
-
 class AboutPage(models.Model):
     title = models.CharField("Заголовок", max_length=255)
     slug = models.SlugField("Slug", max_length=255, unique=False)  # ← не уникальный!
