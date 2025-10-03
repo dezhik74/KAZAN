@@ -227,3 +227,115 @@ class PostView(models.Model):
 
     class Meta:
         unique_together = ('post', 'ip_address')
+
+
+# blog/models.py
+
+import os
+from django.db import models
+from django.contrib.auth.models import User
+from markdownx.models import MarkdownxField
+from .utils import markdownify_with_video  # для рендера контента
+
+# =============== СТРАНИЦА "О НАС" ===============
+def about_page_cover_upload_to(instance, filename):
+    ext = filename.split('.')[-1]
+    return f'about_images/{instance.pk}/cover.{ext}'
+
+class AboutPage(models.Model):
+    title = models.CharField("Заголовок", max_length=255)
+    slug = models.SlugField("Slug", max_length=255, unique=False)  # ← не уникальный!
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        verbose_name="Автор",
+        related_name="about_pages",
+        null=True,
+        blank=True
+    )
+    content_markdown = MarkdownxField(
+        "Контент",
+        help_text="Поддерживается вставка изображений и ссылок на Rutube в формате {{ rutube:abcde123456 }}"
+    )
+    cover_image = models.ImageField(
+        "Обложка",
+        upload_to=about_page_cover_upload_to,
+        blank=True,
+        null=True
+    )
+    # SEO
+    meta_title = models.CharField("SEO Title", max_length=255, blank=True)
+    meta_description = models.CharField("SEO Description", max_length=160, blank=True)
+    # Активность
+    is_active = models.BooleanField("Активна", default=False, help_text="Только одна запись может быть активной")
+    # Временные метки
+    created_at = models.DateTimeField("Создано", auto_now_add=True)
+    updated_at = models.DateTimeField("Обновлено", auto_now=True)
+
+    class Meta:
+        verbose_name = "Страница «О нас»"
+        verbose_name_plural = "Страницы «О нас»"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        # Сохраняем запись, чтобы получить pk (для upload_to)
+        if self.pk is None:
+            saved_image = self.cover_image
+            self.cover_image = None
+            super().save(*args, **kwargs)
+            self.cover_image = saved_image
+            if self.cover_image:
+                # Обновляем имя файла с учётом pk
+                from django.core.files.storage import default_storage
+                old_name = self.cover_image.name
+                new_name = about_page_cover_upload_to(self, os.path.basename(old_name))
+                if old_name != new_name:
+                    self.cover_image.name = default_storage.save(new_name, self.cover_image)
+                    default_storage.delete(old_name)
+        else:
+            if self.is_active:
+                AboutPage.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+
+    def get_seo_title(self):
+        return self.meta_title or self.title
+
+    def get_markdown_content(self):
+        return markdownify_with_video(self.content_markdown)
+
+
+# =============== ГАЛЕРЕЯ ДЛЯ "О НАС" ===============
+def about_page_gallery_upload_to(instance, filename):
+    ext = filename.split('.')[-1]
+    return f'about_images/{instance.page.pk}/gallery.{ext}'
+
+class AboutPageImage(models.Model):
+    page = models.ForeignKey(
+        AboutPage,
+        on_delete=models.CASCADE,
+        verbose_name="Страница «О нас»",
+        related_name="gallery"
+    )
+    image = models.ImageField(
+        "Изображение",
+        upload_to=about_page_gallery_upload_to,
+    )
+    caption = models.CharField("Подпись", max_length=200, blank=True)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+
+    class Meta:
+        verbose_name = "Изображение на странице «О нас»"
+        verbose_name_plural = "Галерея страницы «О нас»"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.page.title} — {self.caption or 'Изображение'}"
+
+    def save(self, *args, **kwargs):
+        # Аналогично: сначала сохраняем без изображения, если pk ещё нет
+        if self.pk is None and self.page.pk is None:
+            raise ValueError("Нельзя сохранить AboutPageImage без сохранённой страницы AboutPage.")
+        super().save(*args, **kwargs)

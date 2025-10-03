@@ -1,0 +1,87 @@
+<!-- blog/templates/blog/about_page.html -->
+{% extends "base.html" %}
+{% block title %}{{ page.title }} — TravelBlog{% endblock %}
+{% block meta_description %}
+    <meta name="description" content="{{ page.meta_description|default:page.title }}"/>
+{% endblock %}
+{% block breadcrumbs %}
+    <nav class="text-sm mb-6 text-text-body/70">
+        <a href="/" class="hover:text-primary transition">Главная</a> /
+        <span class="font-medium text-secondary">О нас</span>
+    </nav>
+{% endblock %}
+{% block content %}
+    <article class="max-w-4xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold mb-6 text-secondary">{{ page.title }}</h1>
+
+        <!-- Обложка -->
+        {% if page.cover_image %}
+            <figure class="mb-8 rounded-lg overflow-hidden border border-tertiary">
+                <img src="{{ page.cover_image.url }}" alt="{{ page.title }}" class="w-full h-auto"/>
+            </figure>
+        {% endif %}
+
+        <!-- Контент -->
+        <div class="prose prose-lg mb-10">
+            {{ content_safe }}
+        </div>
+
+        <!-- Галерея (если есть) -->
+        {% if page.gallery.exists %}
+            <div class="relative w-full max-w-full mx-auto my-8 swiper-container">
+                <div class="swiper swiper-gallery">
+                    <div class="swiper-wrapper">
+                        {% for img in page.gallery.all %}
+                            <div class="swiper-slide flex flex-col items-center justify-center rounded-lg border border-tertiary shadow-sm overflow-hidden">
+                                <div class="relative w-full h-64 md:h-72 lg:h-80">
+                                    <img
+                                            src="{{ img.image.url }}"
+                                            class="w-full h-full object-cover"
+                                            loading="lazy"
+                                            alt="{{ img.caption }}"
+                                    />
+                                </div>
+                                {% if img.caption %}
+                                    <p class="mt-2 text-sm text-center text-gray-600">{{ img.caption }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-button-next !text-white !bg-black/50 !w-10 !h-10 !rounded-full after:!text-xs"></div>
+                    <div class="swiper-button-prev !text-white !bg-black/50 !w-10 !h-10 !rounded-full after:!text-xs"></div>
+                    <div class="swiper-pagination !bottom-0 !pb-2"></div>
+                </div>
+            </div>
+        {% endif %}
+    </article>
+{% endblock %}
+{% block extra_js %}
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const swiper = new Swiper('.swiper-gallery', {
+                loop: true,
+                slidesPerView: 1,
+                spaceBetween: 16,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                breakpoints: {
+                    640: {slidesPerView: 2},
+                    768: {slidesPerView: 3},
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                speed: 800,
+            });
+        });
+    </script>
+{% endblock %}

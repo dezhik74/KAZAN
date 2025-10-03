@@ -1,0 +1,30 @@
+<!-- blog/templates/blog/popular_posts.html -->
+{% extends "base.html" %}
+{% block title %}Популярные статьи — TravelBlog{% endblock %}
+{% block meta_description %}
+    <meta name="description" content="Самые читаемые статьи в нашем блоге о путешествиях по России."/>
+{% endblock %}
+{% block breadcrumbs %}
+    <nav class="text-sm mb-6 text-text-body/70">
+        <a href="/" class="hover:text-primary transition">Главная</a> /
+        <span class="font-medium text-secondary">Популярные</span>
+    </nav>
+{% endblock %}
+{% block content %}
+    <h1 class="text-3xl font-bold mb-2 text-secondary">Популярные статьи</h1>
+    <p class="text-text-body/80 mb-8">
+        Самые просматриваемые записи за всё время.
+    </p>
+    {% if posts %}
+        <div class="space-y-6">
+            {% for post in posts %}
+                {% include "blog/partials/post_card.html" with post=post %}
+            {% endfor %}
+        </div>
+        {% if is_paginated %}
+            {% include "blog/partials/pagination.html" with page_obj=page_obj %}
+        {% endif %}
+    {% else %}
+        <p>Пока нет популярных статей.</p>
+    {% endif %}
+{% endblock %}

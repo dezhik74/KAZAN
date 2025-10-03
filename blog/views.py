@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.urls import reverse
 from markdownx.views import markdownify_func
 
-from .models import BlogPost, Location, Tag, PostView, PostRating
+from .models import BlogPost, Location, Tag, PostView, PostRating, AboutPage
+from .utils import markdownify_with_video
 
 
 class PostListView(ListView):
@@ -95,7 +96,7 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['breadcrumbs'] = self.object.get_breadcrumbs()
-        context["content_markdown_safe"] = markdownify_func(self.object.content_markdown)
+        context["content_markdown_safe"] = markdownify_with_video(self.object.content_markdown)
         return context
 
 
@@ -207,3 +208,71 @@ class PostRatingView(View):
         # Рендерим только обновлённый блок рейтинга
         context = {'post': post}
         return render(request, 'blog/partials/post_rating.html', context)
+
+
+class BestPostsView(ListView):
+    model = BlogPost
+    template_name = 'blog/best_posts.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BlogPost.objects.filter(
+            is_published=True,
+            published_at__isnull=False,
+            published_at__lte=timezone.now()
+        ).annotate(
+            avg_rating=models.Avg('ratings__score')
+        ).filter(
+            avg_rating__isnull=False
+        ).order_by('-avg_rating', '-views_count').select_related('author', 'location')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs'] = [
+            ("Главная", "/"),
+            ("Лучшие", None)
+        ]
+        return context
+
+
+class PopularPostsView(ListView):
+    model = BlogPost
+    template_name = 'blog/popular_posts.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BlogPost.objects.filter(
+            is_published=True,
+            published_at__isnull=False,
+            published_at__lte=timezone.now()
+        ).order_by('-views_count', '-published_at').select_related('author', 'location')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs'] = [
+            ("Главная", "/"),
+            ("Популярные", None)
+        ]
+        return context
+
+
+class AboutPageView(DetailView):
+    model = AboutPage
+    template_name = 'blog/about_page.html'
+    context_object_name = 'page'
+
+    def get_object(self, queryset=None):
+        # Всегда возвращаем единственную активную запись
+        return get_object_or_404(AboutPage, is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs'] = [
+            ("Главная", "/"),
+            ("О нас", None)
+        ]
+        # Рендерим контент с поддержкой Rutube и безопасным HTML
+        context['content_safe'] = markdownify_with_video(self.object.content_markdown)
+        return context

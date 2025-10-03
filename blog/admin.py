@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from .models import Location, Tag, BlogPost, PostImage, PostRating
+from .models import Location, Tag, BlogPost, PostImage, PostRating, AboutPage, AboutPageImage
 
 
 # =============== ЛОКАЦИИ (древовидные) ===============
@@ -166,3 +166,82 @@ class PostRatingAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False  # только через API или пост
+
+# =============== ГАЛЕРЕЯ ДЛЯ "О НАС" (Inline) ===============
+class AboutPageImageInline(admin.TabularInline):
+    model = AboutPageImage
+    extra = 1
+    fields = ("image", "caption", "order", "image_preview")
+    readonly_fields = ("image_preview",)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
+                obj.image.url
+            )
+        return "—"
+    image_preview.short_description = "Превью"
+
+
+# =============== СТРАНИЦА "О НАС" ===============
+@admin.register(AboutPage)
+class AboutPageAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "slug",
+        "author",
+        "is_active",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = ("is_active", "created_at", "author")
+    search_fields = ("title", "content_markdown", "author__username")
+    prepopulated_fields = {"slug": ("title",)}
+    date_hierarchy = "created_at"
+    inlines = [AboutPageImageInline]
+    readonly_fields = ("created_at", "updated_at")
+
+    fieldsets = (
+        ("Основное", {
+            "fields": ("title", "slug", "author", "is_active")
+        }),
+        ("Контент", {
+            "fields": ("content_markdown", "cover_image")
+        }),
+        ("SEO", {
+            "fields": ("meta_title", "meta_description")
+        }),
+        ("Временные метки", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    class Media:
+        css = {
+            'all': ('blog/css/markdownx-horizontal.css',)
+        }
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Принудительно задаём ширину 100% для SEO-полей
+        seo_fields = ['meta_title', 'meta_description']
+        for field_name in seo_fields:
+            if field_name in form.base_fields:
+                form.base_fields[field_name].widget.attrs.update({
+                    'style': 'width: 100%',
+                    'class': 'vTextField'
+                })
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not obj.author:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
+
+    def has_delete_permission(self, request, obj=None):
+        # Защита от случайного удаления активной версии
+        if obj and obj.is_active:
+            return False
+        return super().has_delete_permission(request, obj)

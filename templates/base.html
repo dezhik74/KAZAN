@@ -23,7 +23,9 @@
             <ul class="flex space-x-6">
                 <li><a href="{% url 'blog:location_root' %}" class="hover:text-primary transition">Локации</a></li>
                 <li><a href="{% url 'blog:tag_list' %}" class="hover:text-primary transition">Теги</a></li>
-                <li><a href="#" class="hover:text-primary transition">О нас</a></li>
+                <li><a href="{% url 'blog:best_posts' %}" class="hover:text-primary transition">Лучшие</a></li>
+                <li><a href="{% url 'blog:popular_posts' %}" class="hover:text-primary transition">Популярные</a></li>
+                <li><a href="{% url 'blog:about_page' %}" class="hover:text-primary transition">О нас</a></li>
             </ul>
         </nav>
         <!-- Кнопка гамбургера / крестика -->
@@ -50,7 +52,9 @@
     <nav class="flex flex-col px-4">
         <a href="{% url 'blog:location_root' %}" class="hover:text-primary mb-6 text-lg">Локации</a>
         <a href="{% url 'blog:tag_list' %}" class="hover:text-primary mb-6 text-lg">Теги</a>
-        <a href="#" class="hover:text-primary mb-6 text-lg transition">О нас</a>
+        <a href="{% url 'blog:best_posts' %}" class="hover:text-primary mb-6 text-lg">Лучшие</a>
+        <a href="{% url 'blog:popular_posts' %}" class="hover:text-primary mb-6 text-lg">Популярные</a>
+        <a href="{% url 'blog:about_page' %}" class="hover:text-primary mb-6 text-lg">О нас</a>
     </nav>
 </div>
 
@@ -83,7 +87,7 @@
             hamburgerIcon.classList.add('hidden');
             closeIcon.classList.remove('hidden');
             overlay.classList.remove('hidden');
-            myBody.classList.add('overflow-x-hidden')
+            myBody.classList.add('overflow-hidden')
         };
 
         const closeMenu = () => {
@@ -91,7 +95,7 @@
             closeIcon.classList.add('hidden');
             overlay.classList.add('hidden');
             hamburgerIcon.classList.remove('hidden');
-            myBody.classList.remove('overflow-x-hidden')
+            myBody.classList.remove('overflow-hidden')
         };
 
         mobileMenuButton.addEventListener('click', () => {
@@ -101,6 +105,8 @@
                 closeMenu();
             }
         });
+
+        overlay.addEventListener('click', closeMenu);
 
         menuLinks.forEach(link => {
             link.addEventListener('click', closeMenu);

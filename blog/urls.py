@@ -21,6 +21,13 @@ urlpatterns = [
     path('tags/', views.TagListView.as_view(), name='tag_list'),
     path('tag/<slug:slug>/', views.TagDetailView.as_view(), name='tag_detail'),
 
+    # Лучшие, популярные посты
+    path('best/', views.BestPostsView.as_view(), name='best_posts'),
+    path('popular/', views.PopularPostsView.as_view(), name='popular_posts'),
+
+    # О нас
+    path('about/', views.AboutPageView.as_view(), name='about_page'),
+
     # Оценка поста
     path('post_rate/<int:post_id>/', views.PostRatingView.as_view(), name='post_rate'),
 ]
