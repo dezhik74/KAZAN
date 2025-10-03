@@ -247,7 +247,7 @@ class PopularPostsView(ListView):
             is_published=True,
             published_at__isnull=False,
             published_at__lte=timezone.now()
-        ).order_by('-views_count', '-published_at').select_related('author', 'location')
+        ).order_by('-views_count', '-published_at').select_related('author', 'location')[:10]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
