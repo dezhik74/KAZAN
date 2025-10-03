@@ -9,3 +9,9 @@ npm run dev
 uv run python manage.py  fix_markdown_image_paths.py
 ```
 Или посадить ее на cron
+
+## Для корректной работы sitemap
+
+Запусти в админке (/admin/Сайты/Сайты/):
+Измени домен на свой (например, travelblog.ru)
+Имя — любое (например, TravelBlog)

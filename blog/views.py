@@ -272,3 +272,15 @@ class AboutPageView(DetailView):
         # Рендерим контент с поддержкой Rutube и безопасным HTML
         context['content_safe'] = markdownify_with_video(self.object.content_markdown)
         return context
+
+
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow: /admin/",
+        "Disallow: /markdownx/",
+        "Allow: /",
+        "",
+        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}"
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
