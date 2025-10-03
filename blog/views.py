@@ -100,48 +100,44 @@ class PostDetailView(DetailView):
         return context
 
 
-class LocationDetailView(DetailView):
-    model = Location
+class LocationDetailView(ListView):
     template_name = 'blog/location_detail.html'
-    context_object_name = 'location'
+    context_object_name = 'posts'
+    paginate_by = 10  # ← пагинация
 
-    def get_object(self, queryset=None):
-        # location_path = self.kwargs['location_path']
-        # slug_parts = location_path.split('/')
-        # try:
-        #     location = Location.objects.get(slug=slug_parts[-1])
-        #     if location.get_path_slug() != location_path:
-        #         raise Location.DoesNotExist
-        # except Location.DoesNotExist:
-        #     raise Location.DoesNotExist("Location not found")
-        # return location
+    def get_queryset(self):
         location_path = self.kwargs['location_path'].rstrip('/')
         slug_parts = location_path.split('/')
         try:
             location = Location.objects.get(slug=slug_parts[-1])
-            if location.get_path_slug() == location_path:
-                return location
+            if location.get_path_slug() != location_path:
+                raise Location.DoesNotExist
         except Location.DoesNotExist:
-            pass
-        raise Http404("Локация не найдена")
+            raise Http404("Локация не найдена")
 
+        # Сохраняем локацию в self.location для использования в get_context_data
+        self.location = location
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Все посты в этой локации И её подлокациях
-        descendants = list(self.object.get_descendants())+[self.object]
-        context['posts'] = BlogPost.objects.filter(
+        # Все посты в этой локации и её подлокациях
+        descendants = list(location.get_descendants()) + [location]
+        return BlogPost.objects.filter(
             location__in=descendants,
             is_published=True,
             published_at__lte=timezone.now()
-        ).select_related('author').order_by('-published_at')
+        ).select_related('author', 'location').order_by('-published_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['location'] = self.location
+
+        # Хлебные крошки
         crumbs = [("Главная", "/")]
-        location_crumbs = self.object.get_breadcrumbs()
+        location_crumbs = self.location.get_breadcrumbs()
         for loc, url in location_crumbs:
             crumbs.append((loc.name, url))
         context['breadcrumbs'] = crumbs
-        return context
 
+        return context
 
 class RootLocationListView(ListView):
     model = Location
