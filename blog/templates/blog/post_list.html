@@ -1,7 +1,9 @@
 <!-- blog/templates/blog/post_list.html -->
 {% extends "base.html" %}
 
-{% block title %}Путешествия и локации{% endblock %}
+{% block title %}
+    {% if full_title %}{{ full_title }}{% else %}Путешествия и локации{% endif %} — TravelBlog
+{% endblock %}
 
 {% block content %}
     <!-- Hero / Intro -->

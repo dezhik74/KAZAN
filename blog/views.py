@@ -10,7 +10,7 @@ from django.urls import reverse
 from markdownx.views import markdownify_func
 
 from .models import BlogPost, Location, Tag, PostView, PostRating, AboutPage
-from .utils import markdownify_with_video
+from .utils import markdownify_with_video, add_title_to_context
 
 
 class PostListView(ListView):
@@ -29,6 +29,7 @@ class PostListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['breadcrumbs'] = [("Главная", "/")]
+        context = add_title_to_context(context, "Путешествия и локации")
         return context
 
 
@@ -136,7 +137,7 @@ class LocationDetailView(ListView):
         for loc, url in location_crumbs:
             crumbs.append((loc.name, url))
         context['breadcrumbs'] = crumbs
-
+        context = add_title_to_context(context, self.location.name)
         return context
 
 class RootLocationListView(ListView):
@@ -176,6 +177,7 @@ class TagDetailView(ListView):
             ("Теги", reverse("blog:tag_list")),
             (self.tag.name, None)
         ]
+        context = add_title_to_context(context, f"{self.tag.name} - Теги")
         return context
 
 

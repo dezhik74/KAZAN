@@ -1,4 +1,5 @@
 import re
+from typing import Dict
 
 import markdown
 import bleach
@@ -82,3 +83,14 @@ def markdownify_with_video(text):
     )
 
     return mark_safe(clean_html)
+
+
+def add_title_to_context(context: Dict, base_title: str) -> Dict:
+    """
+    Если это не первая страница пагинации, добавляет в контекст титул
+    с указанием номера страницы
+    """
+    if context['page_obj'].number > 1:
+        context['title_suffix'] = f" — Страница {context['page_obj'].number}"
+        context['full_title'] = base_title + context['title_suffix']
+    return context

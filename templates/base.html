@@ -7,6 +7,8 @@
     {% block meta_description %}
         <meta name="description" content="Путешествия, локации и вдохновение — последние записи из нашего блога."/>
     {% endblock %}
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.build_absolute_uri }}" />
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
     <title>{% block title %}TravelBlog{% endblock %}</title>

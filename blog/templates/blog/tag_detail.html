@@ -1,7 +1,9 @@
 <!-- blog/templates/blog/tag_detail.html -->
 {% extends "base.html" %}
 
-{% block title %}{{ tag.name }} — Теги — TravelBlog{% endblock %}
+{% block title %}
+    {% if full_title %}{{ full_title }}{% else %}{{ tag.name }} — Теги{% endif %} — TravelBlog
+{% endblock %}
 
 {% block meta_description %}
   <meta name="description" content="Статьи с тегом «{{ tag.name }}»: {{ posts|length }} записей." />

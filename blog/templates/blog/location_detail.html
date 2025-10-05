@@ -1,7 +1,9 @@
 <!-- blog/templates/blog/location_detail.html -->
 {% extends "base.html" %}
 
-{% block title %}{{ location.name }} — TravelBlog{% endblock %}
+{% block title %}
+    {% if full_title %}{{ full_title }}{% else %}{{ location.name }}{% endif %} — TravelBlog
+{% endblock %}
 
 {% block meta_description %}
     <meta name="description" content="Записи и подлокации для категории: {{ location.name }}."/>
