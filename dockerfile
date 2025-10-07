@@ -13,9 +13,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Установка uv (официальный способ)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
+# === УСТАНОВКА UV ГЛОБАЛЬНО ===
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && mv /root/.local/bin/uv /usr/local/bin/uv \
+    && mv /root/.local/bin/uvx /usr/local/bin/uvx
 
 # Создание непривилегированного пользователя
 RUN adduser --disabled-password --gecos '' appuser
