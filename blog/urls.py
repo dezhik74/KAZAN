@@ -1,11 +1,14 @@
 # blog/urls.py
 
 from django.urls import path
-from . import views
+from . import views, docker_views
 
 app_name = 'blog'
 
 urlpatterns = [
+    # Docker health-check view
+    path('health/', docker_views.health_view, name='health-check'),
+
     # Главная — список последних постов
     path('', views.PostListView.as_view(), name='home'),
 

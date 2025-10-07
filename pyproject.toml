@@ -10,6 +10,7 @@ dependencies = [
     "django-markdownx>=4.0.9",
     "django-storages[s3]>=1.14.6",
     "django-treebeard>=4.7.1",
+    "gunicorn>=23.0.0",
     "pillow>=11.3.0",
     "python-dotenv>=1.1.1",
 ]
