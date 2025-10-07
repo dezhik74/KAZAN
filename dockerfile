@@ -20,24 +20,28 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
 
 # Создание непривилегированного пользователя
 RUN adduser --disabled-password --gecos '' appuser
-WORKDIR /code
 
-# Копируем pyproject.toml и (опционально) README и т.п.
-COPY --chown=appuser:appuser pyproject.toml README.md /code/
+# Создаём рабочую директорию и даём права appuser
+RUN mkdir -p /code && chown appuser:appuser /code
+
+WORKDIR /code
 
 # Переключаемся на пользователя
 USER appuser
+
+# Копируем только pyproject.toml для кэширования зависимостей
+COPY pyproject.toml README.md ./
 
 # Установка зависимостей через uv
 # --system — использует системный Python (в контейнере это нормально)
 # --no-cache — экономим место
 RUN uv pip install --system --no-cache-dir .
 
-# Копируем всё приложение
-COPY --chown=appuser:appuser . /code/
+# Копируем остальной код
+COPY . .
 
 # Проверка миграций (если нужно)
-COPY --chown=appuser:appuser check_migrations.sh /code/check_migrations.sh
+COPY check_migrations.sh ./
 RUN chmod +x /code/check_migrations.sh
 
 EXPOSE 8000
