@@ -4,6 +4,4 @@ __pycache__
 *.log
 *.env
 *.sqlite3
-/static
-/media
 /venv
