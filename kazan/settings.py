@@ -123,7 +123,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # ← папка с исходниками (input.css) и собранным output.css
+    BASE_DIR / "static_src",  # ← папка с исходниками (input.css) и собранным output.css
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

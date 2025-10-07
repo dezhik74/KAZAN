@@ -22,8 +22,6 @@ COPY --chown=appuser:appuser . /code/
 RUN python -m pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-RUN pip install gunicorn
-
 ENV PATH="/home/appuser/.local/bin:$PATH"
 
 # Проверяем наличие миграций (не применяем!)
