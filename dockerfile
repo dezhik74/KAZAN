@@ -1,49 +1,34 @@
-# Используем официальный образ Python 3.13 (т.к. requires-python = ">=3.13")
 FROM python:3.13-slim-bookworm
 
-# Переменные окружения
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    DJANGO_SETTINGS_MODULE=kazan.settings \
-    UV_LINK_MODE=copy \
-    UV_SYSTEM_PYTHON=1
+    DJANGO_SETTINGS_MODULE=kazan.settings
 
-# Установка системных зависимостей
+# Установка системных зависимостей — от root
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates && \
+    apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-# === УСТАНОВКА UV ГЛОБАЛЬНО ===
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && mv /root/.local/bin/uv /usr/local/bin/uv \
-    && mv /root/.local/bin/uvx /usr/local/bin/uvx
-
-# Создание непривилегированного пользователя
+# Создаём пользователя
 RUN adduser --disabled-password --gecos '' appuser
-
-# Создаём рабочую директорию и даём права appuser
-RUN mkdir -p /code && chown appuser:appuser /code
-
 WORKDIR /code
-
-# Переключаемся на пользователя
 USER appuser
 
-# Копируем только pyproject.toml для кэширования зависимостей
-COPY pyproject.toml README.md ./
+# Копируем только необходимое
+COPY --chown=appuser:appuser requirements.txt /code/
+COPY --chown=appuser:appuser . /code/
 
-# Установка зависимостей через uv
-# --system — использует системный Python (в контейнере это нормально)
-# --no-cache — экономим место
-RUN uv pip install --system --no-cache-dir .
+# Установка зависимостей
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Копируем остальной код
-COPY . .
+RUN pip install gunicorn
 
-# Проверка миграций (если нужно)
-COPY check_migrations.sh ./
+ENV PATH="/home/appuser/.local/bin:$PATH"
+
+# Проверяем наличие миграций (не применяем!)
+COPY --chown=appuser:appuser check_migrations.sh /code/check_migrations.sh
 RUN chmod +x /code/check_migrations.sh
 
 EXPOSE 8000
-
 CMD ["/code/startscript.sh"]

@@ -4,6 +4,8 @@
 ```bash
 npm run dev
 ```
+Перед деплоем запустить uv pip freeze > requirements.txt в терминале, находясь в активированной виртуальной среде проекта
+
 После создания новых постов с картинками внутри надо запускать команду 
 ```bash
 uv run python manage.py  fix_markdown_image_paths.py
