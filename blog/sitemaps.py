@@ -21,6 +21,7 @@ class BlogPostSitemap(sitemaps.Sitemap):
     def items(self):
         return BlogPost.objects.filter(
             is_published=True,
+            is_moderated=True,
             published_at__isnull=False,
             published_at__lte=timezone.now()
         ).order_by('-published_at')

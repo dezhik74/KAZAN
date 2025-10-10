@@ -22,6 +22,7 @@ class PostListView(ListView):
     def get_queryset(self):
         return BlogPost.objects.filter(
             is_published=True,
+            is_moderated=True,
             published_at__isnull=False,
             published_at__lte=timezone.now()
         ).select_related('author', 'location')
@@ -42,6 +43,7 @@ class PostArchiveView(ListView):
     def get_queryset(self):
         return BlogPost.objects.filter(
             is_published=True,
+            is_moderated=True,
             published_at__isnull=False,
             published_at__lte=timezone.now()
         ).select_related('author', 'location').order_by('-published_at')
@@ -124,6 +126,7 @@ class LocationDetailView(ListView):
         return BlogPost.objects.filter(
             location__in=descendants,
             is_published=True,
+            is_moderated=True,
             published_at__lte=timezone.now()
         ).select_related('author', 'location').order_by('-published_at')
 
@@ -165,6 +168,7 @@ class TagDetailView(ListView):
         return BlogPost.objects.filter(
             tags=self.tag,
             is_published=True,
+            is_moderated=True,
             published_at__lte=timezone.now()
         ).select_related('author', 'location').order_by('-published_at')
 
@@ -217,6 +221,7 @@ class BestPostsView(ListView):
     def get_queryset(self):
         return BlogPost.objects.filter(
             is_published=True,
+            is_moderated=True,
             published_at__isnull=False,
             published_at__lte=timezone.now()
         ).annotate(
@@ -244,6 +249,7 @@ class PopularPostsView(ListView):
         return BlogPost.objects.filter(
             is_published=True,
             published_at__isnull=False,
+            is_moderated=True,
             published_at__lte=timezone.now()
         ).order_by('-views_count', '-published_at').select_related('author', 'location')[:10]
 

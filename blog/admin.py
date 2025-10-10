@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
-from .models import Location, Tag, BlogPost, PostImage, PostRating, AboutPage, AboutPageImage
+from .models import Location, Tag, BlogPost, PostImage, PostRating, AboutPage, AboutPageImage, PostView
 
 
 # =============== ЛОКАЦИИ (древовидные) ===============
@@ -74,6 +74,7 @@ class BlogPostAdmin(admin.ModelAdmin):
         "title",
         "author",
         "location",
+        "is_moderated",
         "is_published",
         "published_at",
         "views_count",
@@ -82,6 +83,7 @@ class BlogPostAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "is_published",
+        "is_moderated",
         "published_at",
         "created_at",
         "location",
@@ -118,7 +120,7 @@ class BlogPostAdmin(admin.ModelAdmin):
             "fields": ("meta_title", "meta_description")
         }),
         ("Публикация", {
-            "fields": ("is_published", "published_at")
+            "fields": ("is_moderated", "is_published", "published_at")
         }),
         ("Статистика", {
             "fields": ("views_count", "average_rating_display", "created_at", "updated_at")
@@ -145,11 +147,29 @@ class BlogPostAdmin(admin.ModelAdmin):
             return False
         return super().has_delete_permission(request, obj)
 
-    # Автоматическая установка автора текущим пользователем
+    # Автоматическая установка автора текущим пользователем + управление published_at
     def save_model(self, request, obj, form, change):
         if not obj.author:
             obj.author = request.user
+        # Логика для published_at
+        if obj.is_published and not obj.published_at:
+            obj.published_at = timezone.now()
+        elif not obj.is_published:
+            obj.published_at = None
         super().save_model(request, obj, form, change)
+
+    # is_published недоступно, если не модерировано
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(self.readonly_fields)
+        # 1. Если пост не отмодерирован — нельзя менять is_published
+        if obj and not obj.is_moderated:
+            if "is_published" not in readonly:
+                readonly.append("is_published")
+        # 2. Только суперпользователь может менять is_moderated
+        if not request.user.is_superuser:
+            if "is_moderated" not in readonly:
+                readonly.append("is_moderated")
+        return readonly
 
 
 # =============== РЕГИСТРАЦИЯ ===============
@@ -245,3 +265,14 @@ class AboutPageAdmin(admin.ModelAdmin):
         if obj and obj.is_active:
             return False
         return super().has_delete_permission(request, obj)
+
+
+@admin.register(PostView)
+class PostViewAdmin(admin.ModelAdmin):
+    list_display = ("post", "ip_address", "created_at")
+    list_filter = ("created_at", "post__location")
+    search_fields = ("post__title", "ip_address")
+    readonly_fields = ("post", "ip_address", "created_at")
+    date_hierarchy = "created_at"
+    def has_add_permission(self, request):
+        return False

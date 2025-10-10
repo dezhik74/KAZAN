@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -7,6 +9,7 @@ from markdownx.models import MarkdownxField
 from treebeard.mp_tree import MP_Node
 
 from blog.upload_paths import cover_upload_to, gallery_upload_to, about_page_cover_upload_to
+from blog.utils import markdownify_with_video
 
 
 # =============== ЛОКАЦИИ ===============
@@ -122,6 +125,7 @@ class BlogPost(models.Model):
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
     published_at = models.DateTimeField("Дата публикации", null=True, blank=True)
     is_published = models.BooleanField("Опубликовано", default=False)
+    is_moderated = models.BooleanField("Прошёл модерацию", default=False)
 
     class Meta:
         verbose_name = "Запись блога"
@@ -138,7 +142,12 @@ class BlogPost(models.Model):
 
     def is_visible_to_public(self):
         now = timezone.now()
-        return self.is_published and self.published_at is not None and self.published_at <= now
+        return (
+                self.is_published
+                and self.is_moderated
+                and self.published_at is not None
+                and self.published_at <= now
+        )
 
     def get_absolute_url(self):
         location_path = self.location.get_path_slug()
@@ -227,15 +236,9 @@ class PostView(models.Model):
 
     class Meta:
         unique_together = ('post', 'ip_address', 'created_at')
+        verbose_name = "Просмотр поста"
+        verbose_name_plural = "Просмотры постов"
 
-
-# blog/models.py
-
-import os
-from django.db import models
-from django.contrib.auth.models import User
-from markdownx.models import MarkdownxField
-from .utils import markdownify_with_video  # для рендера контента
 
 # =============== СТРАНИЦА "О НАС" ===============
 class AboutPage(models.Model):
