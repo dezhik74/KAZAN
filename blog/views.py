@@ -62,7 +62,6 @@ class PostDetailView(DetailView):
     def get_object(self, queryset=None):
         location_path = self.kwargs['location_path'].rstrip('/')
         slug = self.kwargs['slug']
-
         # Находим локацию
         slug_parts = location_path.split('/')
         try:
@@ -72,29 +71,33 @@ class PostDetailView(DetailView):
         except Location.DoesNotExist:
             raise Http404("Локация не найдена")
 
-        # Находим пост
-        post = get_object_or_404(
-            BlogPost,
-            slug=slug,
-            location=location,
-            is_published=True,
-            published_at__lte=timezone.now()
-        )
-        ip = self.request.META.get('HTTP_X_FORWARDED_FOR', self.request.META.get('REMOTE_ADDR'))
-        if ip:
-            # Проверяем, не был ли уже просмотрен за последние 24 часа
-            day_ago = timezone.now() - timedelta(hours=24)
-            if not PostView.objects.filter(
-                    post=post,
-                    ip_address=ip,
-                    created_at__gte=day_ago
-            ).exists():
-                PostView.objects.create(post=post, ip_address=ip)
-                BlogPost.objects.filter(pk=post.pk).update(views_count=models.F('views_count') + 1)
-                post.views_count += 1
+        post = get_object_or_404(BlogPost, slug=slug, location=location)
+
+        # Режим предпросмотра: только для авторизованных (в т.ч. из админки)
+        preview = self.request.GET.get('preview') == '1'
+        if preview:
+            if not self.request.user.is_authenticated:
+                raise Http404()
+        else:
+            # Обычный режим: только опубликованные и отмодерированные
+            if not post.is_visible_to_public():
+                raise Http404()
+
+        # Счётчик просмотров — только в обычном режиме
+        if not preview:
+            ip = self.request.META.get('HTTP_X_FORWARDED_FOR', self.request.META.get('REMOTE_ADDR'))
+            if ip:
+                day_ago = timezone.now() - timedelta(hours=24)
+                if not PostView.objects.filter(
+                        post=post,
+                        ip_address=ip,
+                        created_at__gte=day_ago
+                ).exists():
+                    PostView.objects.create(post=post, ip_address=ip)
+                    BlogPost.objects.filter(pk=post.pk).update(views_count=models.F('views_count') + 1)
+                    post.views_count += 1
 
         return post
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

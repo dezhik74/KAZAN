@@ -3,6 +3,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
@@ -95,7 +96,8 @@ class BlogPostAdmin(admin.ModelAdmin):
     date_hierarchy = "published_at"
     filter_horizontal = ("tags",)
     inlines = [PostImageInline, PostRatingInline]
-    readonly_fields = ("views_count", "created_at", "updated_at", "average_rating_display")
+    readonly_fields = ("views_count", "created_at", "updated_at", "average_rating_display", "preview_button")
+    save_on_top = True
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -120,7 +122,7 @@ class BlogPostAdmin(admin.ModelAdmin):
             "fields": ("meta_title", "meta_description")
         }),
         ("Публикация", {
-            "fields": ("is_moderated", "is_published", "published_at")
+            "fields": ("is_moderated", "is_published", "published_at", "preview_button")
         }),
         ("Статистика", {
             "fields": ("views_count", "average_rating_display", "created_at", "updated_at")
@@ -170,6 +172,16 @@ class BlogPostAdmin(admin.ModelAdmin):
             if "is_moderated" not in readonly:
                 readonly.append("is_moderated")
         return readonly
+
+    def preview_button(self, obj):
+        if obj.pk:
+            url = f"{obj.get_absolute_url()}?preview=1"
+            return mark_safe(
+                f'<a href="{url}" target="_blank" class="button" style="margin-top: 8px;">'
+                '👁️ Предпросмотр</a>'
+            )
+        return "— Сохраните пост, чтобы увидеть предпросмотр"
+    preview_button.short_description = "Предпросмотр"
 
 
 # =============== РЕГИСТРАЦИЯ ===============
