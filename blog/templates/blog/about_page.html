@@ -16,13 +16,13 @@
 
         <!-- Обложка -->
         {% if page.cover_image %}
-            <figure class="mb-8 rounded-lg overflow-hidden border border-tertiary">
+            <figure class="mb-8 rounded-lg overflow-hidden border border-tertiary max-w-4xl mx-auto">
                 <img src="{{ page.cover_image.url }}" alt="{{ page.title }}" class="w-full h-auto"/>
             </figure>
         {% endif %}
 
         <!-- Контент -->
-        <div class="prose prose-lg mb-10">
+        <div class="prose prose-lg mb-10 max-w-4xl mx-auto">
             {{ content_safe }}
         </div>
 
