@@ -17,3 +17,8 @@ uv run python manage.py  fix_markdown_image_paths.py
 Запусти в админке (/admin/Сайты/Сайты/):
 Измени домен на свой (например, travelblog.ru)
 Имя — любое (например, TravelBlog)
+
+Для отложенной публикации на сервере должен быть сконфигурирован cron
+```
+01 23 * * * root docker exec kazan1 python manage.py publish_post >> /var/log/publish_post.log 2>&1
+```
