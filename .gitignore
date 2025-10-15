@@ -19,3 +19,5 @@ wheels/
 node_modules
 
 static/css/output.css
+
+.continue/

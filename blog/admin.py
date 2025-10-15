@@ -80,7 +80,7 @@ class BlogPostAdmin(admin.ModelAdmin):
         "published_at",
         "views_count",
         "average_rating_display",
-        "updated_at",
+        "created_at",
     )
     list_filter = (
         "is_published",

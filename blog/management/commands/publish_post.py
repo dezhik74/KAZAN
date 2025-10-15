@@ -23,7 +23,7 @@ class Command(BaseCommand):
             candidate = BlogPost.objects.filter(
                 is_moderated=True,
                 is_published=False
-            ).order_by('updated_at').first()
+            ).order_by('created_at').first()
             if candidate:
                 self._publish_post(candidate, now)
             else:
