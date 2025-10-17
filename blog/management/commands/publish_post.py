@@ -8,8 +8,8 @@ class Command(BaseCommand):
     help = "Публикует один отмодерированный, но неопубликованный пост, если прошло более суток с последней публикации."
 
     def handle(self, *args, **options):
-        now = timezone.now()
-        one_day_ago = now - timedelta(days=1)
+        now = timezone.localtime(timezone.now())
+        one_day_ago = now - timedelta(hours=23)
 
         # 1. Находим самый поздний опубликованный пост
         latest_published = BlogPost.objects.filter(
