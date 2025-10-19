@@ -162,7 +162,7 @@ MARKDOWNX_MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
 # Разрешённые расширения
 MARKDOWNX_UPLOAD_CONTENT_TYPES = [
-    'image/jpeg',
+    'image/jpeg', 'image/webp'
 ]
 
 # Путь для загрузки изображений (по умолчанию: 'markdownx/')

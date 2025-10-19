@@ -77,10 +77,10 @@ class BlogPostAdmin(admin.ModelAdmin):
         "location",
         "is_moderated",
         "is_published",
-        "published_at",
+        "get_published_at_short",
         "views_count",
         "average_rating_display",
-        "updated_at",
+        "get_created_at_short",
     )
     list_filter = (
         "is_published",
@@ -141,6 +141,16 @@ class BlogPostAdmin(admin.ModelAdmin):
             return f"★{avg} ({count} голосов)"
         return "—"
     average_rating_display.short_description = "Рейтинг"
+    
+    def get_published_at_short(self, obj):
+        if obj.published_at:
+            return obj.published_at.strftime("%d/%m/%y %H:%M")
+        return "—"
+    get_published_at_short.short_description = "Опубликовано"
+
+    def get_created_at_short(self, obj):
+        return obj.created_at.strftime("%d/%m/%y %H:%M")
+    get_created_at_short.short_description = "Создано"
 
     # Защита от удаления опубликованных записей без подтверждения
     def has_delete_permission(self, request, obj=None):
