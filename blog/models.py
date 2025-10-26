@@ -116,7 +116,7 @@ class BlogPost(models.Model):
 
     # SEO
     meta_title = models.CharField("SEO Title", max_length=255, blank=True)
-    meta_description = models.CharField("SEO Description", max_length=160, blank=True)
+    meta_description = models.CharField("SEO Description", max_length=255, blank=True)
 
     # Статистика
     views_count = models.PositiveIntegerField("Просмотры", default=0)
