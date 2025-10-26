@@ -5,11 +5,11 @@ from django.utils import timezone
 from blog.models import BlogPost
 
 class Command(BaseCommand):
-    help = "Публикует один отмодерированный, но неопубликованный пост, если прошло более суток с последней публикации."
+    help = "Публикует один отмодерированный, но неопубликованный пост, если прошло более 3-х суток с последней публикации."
 
     def handle(self, *args, **options):
         now = timezone.localtime(timezone.now())
-        one_day_ago = now - timedelta(hours=23)
+        one_day_ago = now - timedelta(days=3) # да, это уже не день назад, посты надо выпускать реже...
 
         # 1. Находим самый поздний опубликованный пост
         latest_published = BlogPost.objects.filter(
@@ -30,11 +30,11 @@ class Command(BaseCommand):
                 self.stdout.write("Нет подходящих постов для публикации.")
             return
 
-        # 3. Если последняя публикация была менее суток назад — ничего не делаем
+        # 3. Если последняя публикация была менее 3-х суток назад — ничего не делаем
         if latest_published.published_at >= one_day_ago:
             self.stdout.write(
                 f"Последняя публикация была {latest_published.published_at}. "
-                "Менее суток назад — пропускаем."
+                "Менее 3-х суток назад — пропускаем."
             )
             return
 
