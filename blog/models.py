@@ -110,7 +110,8 @@ class BlogPost(models.Model):
         "Обложка",
         upload_to=cover_upload_to,
         blank=True,
-        null=True
+        null=True,
+        max_length=650,
     )
 
     # SEO
