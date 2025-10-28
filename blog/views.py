@@ -290,6 +290,15 @@ def robots_txt(request):
         "User-Agent: *",
         "Disallow: /admin/",
         "Disallow: /markdownx/",
+        # добавляем страницы старого домена, которые надо убрать из индексации (замечание Яндекс Вебмастер)
+        "Disallow: /category/без-рубрики",
+        "Disallow: /kuda-poehat-v-rossii/aktualnye-novosti",
+        "Disallow: /kupit-tur-po-rossii",
+        "Disallow: /sdat-oge-i-ege-na-100-ballov",
+        "Disallow: /без-рубрики/zolotoe-kolczo-rossii-tury",
+        "Disallow: /author/admin",
+        "Disallow: /karta-sajta-1",
+        # -----------
         "Allow: /",
         "",
         f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}"
