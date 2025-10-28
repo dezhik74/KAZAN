@@ -291,11 +291,11 @@ def robots_txt(request):
         "Disallow: /admin/",
         "Disallow: /markdownx/",
         # добавляем страницы старого домена, которые надо убрать из индексации (замечание Яндекс Вебмастер)
-        "Disallow: /category/без-рубрики",
+        "Disallow: /category/%D0%B1%D0%B5%D0%B7-%D1%80%D1%83%D0%B1%D1%80%D0%B8%D0%BA%D0%B8",
         "Disallow: /kuda-poehat-v-rossii/aktualnye-novosti",
         "Disallow: /kupit-tur-po-rossii",
         "Disallow: /sdat-oge-i-ege-na-100-ballov",
-        "Disallow: /без-рубрики/zolotoe-kolczo-rossii-tury",
+        "Disallow: /%D0%B1%D0%B5%D0%B7-%D1%80%D1%83%D0%B1%D1%80%D0%B8%D0%BA%D0%B8/zolotoe-kolczo-rossii-tury",
         "Disallow: /author/admin",
         "Disallow: /karta-sajta-1",
         # -----------
